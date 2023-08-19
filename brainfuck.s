@@ -3,13 +3,14 @@
 	# $s1 is the bracket depth
 	# $s2 is the data pointer
 	# $s3 is the data limit pointer
+	# stack grows to the bottom so <> are inverted
 
 	.data
 program:	.asciiz "++++++++[>++++[>++>+++>+++>+<<<<-]>+>+>->>+[<]<-]>>.>---.+++++++..+++.>>.<-.<.+++.------.--------.>>+.>++."
 panicmsg:	.asciiz "machine panic"
 
 	.text
-main:	addi $t0, $zero, 30	# init vector of 30000 bytes with 0s
+main:	addi $t0, $zero, 30000	# init vector of 30000 bytes with 0s
 idtini:	blt $t0, $zero, edtini
 	sub $t1, $sp, $t0
 	sb $zero, 1($t1)
@@ -30,11 +31,11 @@ mainlp:	blt $sp, $s2, panic	# panic if $s2 overflows
 
 	li $t1, '>'		# handle > instruction (increment vector
 	bne $t0, $t1, hgti	# pointer)
-	addi $s2, $s2, 1
+	subi $s2, $s2, 1
 	j endlp
 hgti:	li $t1, '<'		# handle < instruction (decrement vector
 	bne $t0, $t1, hpls	# pointer)
-	subi $s2, $s2, 1
+	addi $s2, $s2, 1
 	j endlp
 hpls:	li $t1, '+'		# handle + instruction (increment byte at point)
 	bne $t0, $t1, hmin
@@ -67,31 +68,39 @@ hcom:	li $t1, ','		# handle , instruction (input a byte at point)
 	#
 hobk:	li $t1, '['		# handle [ instruction (branch forward on zero)
 	bne $t0, $t1, hcbk
-	addi $s2, $s2, 1	# increment instruction pointer
 	addi $s1, $s1, 1	# increment bracket depth
-	lb $t2, 1($s2)
+	lb $t2, 1($s0)
 	bne $t2, $zero, endlp	# magic starts here
 	li $t2, ']'		# $t2 will have the other bracket
+	li $t4, '\0'		# constants to panic
+	la $t5, program
 lpobk:	beq $s1, $zero, endlp	# stop on bracket depth == 0
-	lb $t3, 1($s2)
-	bne $t3, $t2, iscbko	# if is ], decrement bracket depth
+	addi $s0, $s0, 1
+	lb $t3, 1($s0)
+	bne $t3, $t2, iscoko	# if is ], decrement bracket depth
 	subi $s1, $s1, 1
-iscoko:	bne $t3, $t1, lpobk	# if is [, increase bracket depth
+iscoko:	beq $t3, $t4, panic 	# if is halt, panic
+	blt $s0, $t5, panic	# if overflows, panic
+	bne $t3, $t1, lpobk	# if is [, increase bracket depth
 	addi $s1, $s1, 1
 	j lpobk
 
 hcbk:	li $t1, ']'		# handle ] instruction (branch backward on
 	bne $t0, $t1, endlp	# non-zero)
-	subi $s2, $s2, 1	# everything from here is basically the same as
-	addi $s1, $s1, 1	# with [ but inverted
-	lb $t2, 1($2)
-	beq $t2, $zero		# magic starts here (again)
+	addi $s1, $s1, 1	# everything from here is basically the same as
+	lb $t2, 1($s0)		# with [ but inverted
+	beq $t2, $zero, endlp	# magic starts here (again)
 	li $t2, '['
+	li $t4, '\0'		# constants to panic
+	la $t5, program
 lpcbk:	beq $s1, $zero, endlp
-	lb $t3, 1($s2)
+	subi $s0, $s0, 1
+	lb $t3, 1($s0)
 	bne $t3, $t2, isobkc
 	subi $s1, $s1, 1
-isobkc:	bne $t3, $t1, lpcbk
+isobkc:	beq $t3, $t4, panic 	# if is halt, panic
+	blt $s0, $t5, panic	# if overflows, panic
+	bne $t3, $t1, lpcbk
 	addi $s1, $s1, 1
 	j lpcbk
 
