@@ -9,23 +9,23 @@ program:	.asciiz "++++++++[>++++[>++>+++>+++>+<<<<-]>+>+>->>+[<]<-]>>.>---.+++++
 panicmsg:	.asciiz "machine panic"
 
 	.text
-main:	addi $t0, $zero, 30000	# init vector of 30000 bytes with 0s
+main:	addi $t0, $zero, 30	# init vector of 30000 bytes with 0s
 idtini:	blt $t0, $zero, edtini
 	sub $t1, $sp, $t0
 	sb $zero, 1($t1)
 	subi $t0, $t0, 1
-	j isini
+	j idtini
 
 edtini:	add $s2, $sp, $zero	# init vector pointer
 	sub $s3, $sp, 30000	# init vector limit pointer
-	li $s0, program		# init instruction pointer
+	la $s0, program		# init instruction pointer
 	add $s1, $zero, $zero	# init bracket depth
 
 mainlp:	blt $sp, $s2, panic	# panic if $s2 overflows
 	bgt $s3, $s2, panic	# panic if $s2 passes the vector limit
 
 	lb $t0, 1($s0)		# load instruction in $t0
-	li $t1, '0'		# stop if it is the halt pseudo-instruction '0'
+	li $t1, '\0'		# stop if it is the halt pseudo-instruction '\0'
 	beq $t0, $t1, halt
 
 	li $t1, '>'		# handle > instruction (increment vector
@@ -102,7 +102,7 @@ halt:	li $v0, 10
 	syscall
 
 panic:	li $v0, 4
-	li $a0, panicmsg
+	la $a0, panicmsg
 	syscall
 	li $v0, 17
 	li $a0, 1
