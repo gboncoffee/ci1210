@@ -3,14 +3,23 @@
 	# $s1 is the bracket depth
 	# $s2 is the data pointer
 	# $s3 is the data limit pointer
+	# $s4 is the program init pointer
 	# stack grows to the bottom so <> are inverted
 
 	.data
-program:	.asciiz "++++++++[>++++[>++>+++>+++>+<<<<-]>+>+>->>+[<]<-]>>.>---.+++++++..+++.>>.<-.<.+++.------.--------.>>+.>++."
 panicmsg:	.asciiz "machine panic"
 
 	.text
-main:	addi $t0, $zero, 30000	# init vector of 30000 bytes with 0s
+main:	li $v0, 9		# call to allocate a buffer for the text
+	li $a0, 1024
+	syscall
+	add $s4, $v0, $zero	# copy address of program to $s4
+	add $a0, $s4, $zero	# copy address to call to read string
+	li $a1, 1024
+	li $v0, 8
+	syscall
+
+	addi $t0, $zero, 30000	# init vector of 30000 bytes with 0s
 idtini:	blt $t0, $zero, edtini
 	sub $t1, $sp, $t0
 	sb $zero, 0($t1)
@@ -19,7 +28,7 @@ idtini:	blt $t0, $zero, edtini
 
 edtini:	add $s2, $sp, $zero	# init vector pointer
 	sub $s3, $sp, 30000	# init vector limit pointer
-	la $s0, program		# init instruction pointer
+	add $s0, $s4, $zero	# init instruction pointer
 	add $s1, $zero, $zero	# init bracket depth
 
 mainlp:	blt $sp, $s2, panic	# panic if $s2 overflows
@@ -96,7 +105,7 @@ iscobk:	bne $t3, $t2, zeroc
 zeroc:	beq $s1, $zero, endlp
 	addi $t5, $s0, 0	# only needs to test underflow here
 	subi $s0, $s0, 1
-	la $t6, program
+	add $t6, $s4, $zero
 	blt $s0, $t6, panic	# access memory before program starts
 	blt $t5, $s0, panic	# true integer underflow
 	j lpcbk
