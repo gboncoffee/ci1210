@@ -1,7 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <circuit>
   <version>1</version>
-  <attributes/>
+  <attributes>
+    <entry>
+      <string>Width</string>
+      <int>5</int>
+    </entry>
+  </attributes>
   <visualElements>
     <visualElement>
       <elementName>Register</elementName>
@@ -331,16 +336,16 @@
       <elementName>Multiplexer</elementName>
       <elementAttributes>
         <entry>
-          <string>Bits</string>
-          <int>32</int>
-        </entry>
-        <entry>
           <string>Selector Bits</string>
           <int>5</int>
         </entry>
         <entry>
           <string>rotation</string>
           <rotation rotation="1"/>
+        </entry>
+        <entry>
+          <string>Bits</string>
+          <int>32</int>
         </entry>
       </elementAttributes>
       <pos x="900" y="180"/>
@@ -406,7 +411,7 @@
       <elementAttributes>
         <entry>
           <string>Label</string>
-          <string>RS1</string>
+          <string>RS1i</string>
         </entry>
         <entry>
           <string>Bits</string>
@@ -420,7 +425,7 @@
       <elementAttributes>
         <entry>
           <string>Label</string>
-          <string>RS2</string>
+          <string>RS2i</string>
         </entry>
         <entry>
           <string>Bits</string>
