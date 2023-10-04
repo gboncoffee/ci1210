@@ -282,12 +282,12 @@
       <elementName>Rectangle</elementName>
       <elementAttributes>
         <entry>
-          <string>Label</string>
-          <string>Debug values</string>
-        </entry>
-        <entry>
           <string>RectHeight</string>
           <int>16</int>
+        </entry>
+        <entry>
+          <string>Label</string>
+          <string>Debug values</string>
         </entry>
         <entry>
           <string>RectWidth</string>
