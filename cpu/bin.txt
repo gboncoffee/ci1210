@@ -11,16 +11,12 @@
 00000028	000000000001 t1 000 t1 0010011 # addi t1, t1, 1
 0000002c	11111111000111111111 zero 1101111 # jal zero, print
 00000030	00000000000000000000000000000000 # halt (exit)
-
-# fib :: v (a0) -> tam (a1) -> e1 (a2) -> e2 (a3) -> ()
-fib:	sw a2, 0(a0)		# na função operamos com as variáveis em ax
-	sw a3, 4(a0)		# pois não há chamada de outras funções
-	addi a0, a0, 8
-
-	slli t0, a1, 2	# multiplica o tamanho do vetor por 4
-	add t0, t0, a0	# salva o endereço final do vetor em t0
-
-loop:	blt t0, a0, ret	# sai se passar do fim do vetor
+00000034	0000000 a0 a2 000 00000 0100011 # sw a2, 0(a0) (fib)
+00000038	0000000 a0 a3 000 00000 0100011 # sw a3, 4(a0)
+0000003c	000000001000 a0 000 a0 0010011 # addi a0, a0, 8
+00000040	000000000010 a1 001 t0 0010011 # slli t0, a1, 2
+00000044	0000000 a0 t0 000 t0 0110011 # add t0, t0, a0
+00000048	# blt t0, a0, ret (loop)
 	add t1, a2, a3	# aproveita ax como cache
 	sw t1, 0(a0)		# v[i] = v[i - 1] + v[i - 2]
 	add a2, a3, zero
