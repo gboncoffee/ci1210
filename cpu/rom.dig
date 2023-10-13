@@ -18,6 +18,14 @@
           <string>intFormat</string>
           <intFormat>dec</intFormat>
         </entry>
+        <entry>
+          <string>lastDataFile</string>
+          <file>mod0.bin</file>
+        </entry>
+        <entry>
+          <string>autoReload</string>
+          <boolean>true</boolean>
+        </entry>
       </elementAttributes>
       <pos x="880" y="320"/>
     </visualElement>
@@ -29,12 +37,24 @@
           <int>24</int>
         </entry>
         <entry>
+          <string>isProgramMemory</string>
+          <boolean>true</boolean>
+        </entry>
+        <entry>
           <string>Bits</string>
           <int>8</int>
         </entry>
         <entry>
           <string>intFormat</string>
           <intFormat>dec</intFormat>
+        </entry>
+        <entry>
+          <string>lastDataFile</string>
+          <file>mod1.bin</file>
+        </entry>
+        <entry>
+          <string>autoReload</string>
+          <boolean>true</boolean>
         </entry>
       </elementAttributes>
       <pos x="880" y="440"/>
@@ -47,12 +67,24 @@
           <int>24</int>
         </entry>
         <entry>
+          <string>isProgramMemory</string>
+          <boolean>true</boolean>
+        </entry>
+        <entry>
           <string>Bits</string>
           <int>8</int>
         </entry>
         <entry>
           <string>intFormat</string>
           <intFormat>dec</intFormat>
+        </entry>
+        <entry>
+          <string>lastDataFile</string>
+          <file>mod2.bin</file>
+        </entry>
+        <entry>
+          <string>autoReload</string>
+          <boolean>true</boolean>
         </entry>
       </elementAttributes>
       <pos x="880" y="560"/>
@@ -65,12 +97,24 @@
           <int>24</int>
         </entry>
         <entry>
+          <string>isProgramMemory</string>
+          <boolean>true</boolean>
+        </entry>
+        <entry>
           <string>Bits</string>
           <int>8</int>
         </entry>
         <entry>
           <string>intFormat</string>
           <intFormat>dec</intFormat>
+        </entry>
+        <entry>
+          <string>lastDataFile</string>
+          <file>mod3.bin</file>
+        </entry>
+        <entry>
+          <string>autoReload</string>
+          <boolean>true</boolean>
         </entry>
       </elementAttributes>
       <pos x="880" y="640"/>
