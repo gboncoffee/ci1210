@@ -41,7 +41,7 @@
       <elementAttributes>
         <entry>
           <string>Label</string>
-          <string>PC Lau</string>
+          <string>PC Alu</string>
         </entry>
       </elementAttributes>
       <pos x="940" y="420"/>
@@ -92,7 +92,7 @@
       <elementAttributes>
         <entry>
           <string>Label</string>
-          <string>Lau out</string>
+          <string>Alu out</string>
         </entry>
         <entry>
           <string>Bits</string>
