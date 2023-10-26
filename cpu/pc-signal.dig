@@ -143,7 +143,7 @@
     <visualElement>
       <elementName>Not</elementName>
       <elementAttributes/>
-      <pos x="560" y="660"/>
+      <pos x="560" y="640"/>
     </visualElement>
     <visualElement>
       <elementName>Const</elementName>
@@ -231,16 +231,20 @@
       <p2 x="780" y="320"/>
     </wire>
     <wire>
+      <p1 x="860" y="480"/>
+      <p2 x="880" y="480"/>
+    </wire>
+    <wire>
+      <p1 x="600" y="640"/>
+      <p2 x="640" y="640"/>
+    </wire>
+    <wire>
       <p1 x="520" y="640"/>
       <p2 x="540" y="640"/>
     </wire>
     <wire>
       <p1 x="540" y="640"/>
-      <p2 x="640" y="640"/>
-    </wire>
-    <wire>
-      <p1 x="860" y="480"/>
-      <p2 x="880" y="480"/>
+      <p2 x="560" y="640"/>
     </wire>
     <wire>
       <p1 x="880" y="420"/>
@@ -347,12 +351,8 @@
       <p2 x="700" y="660"/>
     </wire>
     <wire>
-      <p1 x="600" y="660"/>
-      <p2 x="640" y="660"/>
-    </wire>
-    <wire>
       <p1 x="540" y="660"/>
-      <p2 x="560" y="660"/>
+      <p2 x="640" y="660"/>
     </wire>
     <wire>
       <p1 x="600" y="600"/>
@@ -420,15 +420,11 @@
     </wire>
     <wire>
       <p1 x="620" y="620"/>
-      <p2 x="620" y="640"/>
+      <p2 x="620" y="680"/>
     </wire>
     <wire>
       <p1 x="620" y="340"/>
       <p2 x="620" y="360"/>
-    </wire>
-    <wire>
-      <p1 x="620" y="640"/>
-      <p2 x="620" y="680"/>
     </wire>
     <wire>
       <p1 x="620" y="680"/>

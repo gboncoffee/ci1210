@@ -27,15 +27,15 @@ print:	beq t1, t0, exit
 	addi t1, t1, 1
 	jal zero, print
 
-exit:	halt
+exit:	add zero, zero, zero
 
 # fib :: v (a0) -> tam (a1) -> e1 (a2) -> e2 (a3) -> ()
 fib:	sw a2, 0(a0)		# na função operamos com as variáveis em ax
 	sw a3, 4(a0)		# pois não há chamada de outras funções
-	addi a0, a0, 8
 
 	slli t0, a1, 2	# multiplica o tamanho do vetor por 4
 	add t0, t0, a0	# salva o endereço final do vetor em t0
+	addi a0, a0, 8
 
 loop:	blt t0, a0, ret	# sai se passar do fim do vetor
 	add t1, a2, a3	# aproveita ax como cache
