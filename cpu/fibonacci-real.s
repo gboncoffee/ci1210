@@ -24,7 +24,7 @@
 print:	beq t1, t0, exit
 	lw t2, 0(t1)	# load e store para debuggar o vetor
 	sw t2, 0(t1)
-	addi t1, t1, 1
+	addi t1, t1, 4
 	jal zero, print
 
 exit:	add zero, zero, zero
