@@ -1,0 +1,78 @@
+\documentclass[twocolumn]{article}
+
+\usepackage[brazilian]{babel}
+\usepackage[utf8]{inputenc} % arruma utf8
+\usepackage[T1]{fontenc} % arruma ctrl+c com utf8
+\usepackage{indentfirst}
+\usepackage[hidelinks]{hyperref, xurl} % \url
+\usepackage{caption}
+\usepackage{amsmath, amssymb}
+\usepackage{graphicx}
+
+\title{Implementação Simulada de um Subconjunto da Microarquitetura RISC-V de 32
+  Bits}
+\author{Gabriel G. de Brito}
+
+\begin{document}
+
+\maketitle
+
+\section{Introdução}
+
+Esse trabalho apresenta o processo de implementação de um subconjunto de
+instruções da microarquitetura de processadores RISC-V de 32 bits em um
+simulador de lógica digital. Para provar a corretude da implementação, ela deve
+rodar um programa em Assembly que computa a sequência de fibonacci em um vetor
+em memória.
+
+Tanto a microarquitetura quanto o programa foram implementados com sucesso,
+inclusive com os requisitos sendo excedidos.
+
+\section{A Microarquitetura}
+
+Os requisitos do trabalho pedem que sejam implementados todos os registradores
+da especificação da microarquitetura e as seguintes instruções\cite{spec}:
+
+\begin{itemize}
+\item Instruções Aritméticas sem Imediato \\
+  \begin{tabular}{ c c }
+    \verb|add| & \hspace*{\fill} Adição ($+$) \\
+    \verb|sub| & \hspace*{\fill} Subtração ($-$) \\
+    \verb|xor| & \hspace*{\fill} OU Exclusivo lógico ($\oplus$) \\
+    \verb|or| & \hspace*{\fill} OU lógico ($+$) \\
+    \verb|and| & \hspace*{\fill} E lógico ($\cdot$) \\
+    \verb|sll| & \hspace*{\fill} Shift lógico para esquerda ($<<$) \\
+    \verb|slt| & \hspace*{\fill} Menor que ($<$)
+  \end{tabular}
+\item Instruções Aritméticas com Imediato \\
+  \begin{tabular}{ c c }
+    \verb|addi| & \hspace*{\fill} Adição ($+$)\\
+    \verb|xori| & \hspace*{\fill} OU Exclusivo lógico ($\oplus$) \\
+    \verb|ori| & \hspace*{\fill} OU lógico ($+$) \\
+    \verb|andi| & \hspace*{\fill} E lógico ($\cdot$) \\
+    \verb|slli| & \hspace*{\fill} Shift lógico para esquerda ($<<$)\\
+    \verb|slti| & \hspace*{\fill} Menor que ($<$)
+  \end{tabular}
+\item Instruções de Manipulação de Memória \\
+  \begin{tabular}{ c c }
+    \verb|lw| & \hspace*{\fill} Carrega palavra \\
+    \verb|sw| & \hspace*{\fill} Salva palavra
+  \end{tabular}
+\item Instruções de Controle de Fluxo \\
+  \begin{tabular}{ c c }
+    \verb|beq| & \hspace*{\fill} Break se igual a ($=$) \\
+    \verb|bne| & \hspace*{\fill} Break se diferente de ($\neq$)\\
+    \verb|blt| & \hspace*{\fill} Break se menor que ($<$) \\
+    \verb|bge| & \hspace*{\fill} Break se maior ou igual a ($\geq$) \\
+  \end{tabular}
+\item Instruções de Salto \\
+  \begin{tabular}{ c c }
+    \verb|jal| & \hspace*{\fill} Salto para imediato \\
+    \verb|jalr| & \hspace*{\fill} Salto para registrador
+  \end{tabular}
+\end{itemize}
+
+\bibliography{referencias}{}
+\bibliographystyle{ieeetr}
+
+\end{document}
