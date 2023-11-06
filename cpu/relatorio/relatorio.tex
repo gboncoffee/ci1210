@@ -31,7 +31,8 @@ inclusive com os requisitos sendo excedidos.
 \section{A Microarquitetura}
 
 Os requisitos do trabalho pedem que sejam implementados todos os registradores
-da especificação da microarquitetura e as seguintes instruções\cite{spec}:
+da especificação da microarquitetura e as seguintes instruções\cite{spec}, no
+simulador de lógica digital em CMOS Digital\cite{digital}:
 
 \begin{itemize}
 \item Instruções Aritméticas sem Imediato \\
@@ -71,6 +72,11 @@ da especificação da microarquitetura e as seguintes instruções\cite{spec}:
     \verb|jalr| & \hspace*{\fill} Salto para registrador
   \end{tabular}
 \end{itemize}
+
+Além disso, os requisitos pedem uma implementação em modelo de monociclo, e
+permite que o endereçamento seja feito palavra-a-palavra ao invés de
+byte-a-byte, por ser mais viável no simulador utilizado. A implementação
+descrita aqui utiliza endereçamento byte-a-byte.
 
 \bibliography{referencias}{}
 \bibliographystyle{ieeetr}
