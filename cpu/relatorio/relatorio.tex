@@ -146,6 +146,66 @@ A saída de 32 bits \textit{R} possui o resultado da operação em si, e a saíd
 do resultado. Dessa forma, essa saída será 1 apenas quando o resultado for
 exatamente 0.
 
+\section{Sinais}
+
+Certos aspectos do funcionamento do processador são controlados por um módulo
+chamado de processador de sinais. Esse componente possui uma entrada de 7 bits
+por onde recebe o \textit{opcode} da instrução atual e outra entrada com os
+demais 25 bits. Esse módulo produz as seguintes saídas:
+
+\circuit{signal-proc}
+
+\begin{itemize}
+\item 3 bits na saída \textit{Func 3}, usado pela ULA na entrada \textit{OP3} e
+  no controle de fluxo;
+\item 7 bits na saída \textit{Func 7}, usado pela ULA na entrada \textit{OP7} e
+  no controle de fluxo;
+\item 1 bit na saída \textit{Load PC}, que indica se o banco de registradores
+  deve receber como dado de escrita o valor do PC;
+\item 1 bit na saída \textit{Load ALU}, que indica se o banco de registradores
+  deve receber como dado de escrita o resultado da ULA;
+\item 1 bit na saída \textit{Reg Store}, que indica se o sinal de escrita no
+  banco de registradores deve ser ativo;
+\item 1 bit na saída \textit{Mem Store}, que indica se o sinal de escrita da
+  memória deve ser ativo;
+\item 1 bit na saída \textit{Lau IMM}, que indica se a ULA deve receber na
+  entrada \textit{B} um valor imediato ou o valor da saída \textit{RS2} do banco
+  de registradores;
+\end{itemize}
+
+No caso em que ambos \textit{Load PC} e \textit{Load ALU} não estão em 1, o
+banco de registradores deve receber a saída da memória.
+
+Como todas as instruções que devem ser implementadas tem \textit{opcode}
+começando com 0b11, os dois primeiros bits são ignorados. Quanto ao resto, a
+lógica é a seguinte:
+
+\begin{itemize}
+\item Caso o quinto bit seja 1, a instrução é aritmética de tipo R ou I. Nesses
+  casos, ambos \textit{Func 3} e \textit{Func 7} estão codificados na instrução
+  da mesma maneira que seus equivalentes na ULA, portanto basta
+  propagá-los. Da mesma forma, o banco de registradores deve receber o resultado
+  da ULA como dado de escrita, portanto \textit{Load ALU} é configurado para 1;
+\item Caso o terceiro ou quinto bit seja 1, ou o sexto seja 0, a instrução
+  precisa escrever no banco de registradores, então \textit{Reg Store} é
+  configurado de acordo;
+\item Caso o terceiro bit seja 1, a instrução é um salto, situação em que
+  \textit{Load PC} deve ser 1;
+\item Caso o sexto bit seja 1 e ambos quinto e sétimo 0, a instrução é um
+  \textit{store}, portanto \textit{Load Mem} deve ser 1 para que o banco de
+  registradores carregue dados da memória;
+\item Caso o terceiro bit seja 0 e ambos sexto e sétimo 1, a instrução é um
+  \textit{branch}. Nessa situação, a ULA deve realizar uma subtração de qualquer
+  forma, portanto \textit{Func 3} é configurado para 0 e \textit{Func 7} para
+  32.
+\item Por fim, a ULA deve receber um imediato na entrada \textit{B} ao invés da
+  saída de \textit{RS2} nas situações em que a instrução seja um salto, um
+  \textit{load}, um \textit{store}, ou uma operação aritmética com
+  imediato. Para que o sinal \textit{Lau IMM} seja configurado de acordo, ele é
+  ligado à uma porta NAND que recebe como inputs a negação dos terceiro e quarto
+  bits, um OR entre o quinto e o sétimo, e o sexto.
+\end{itemize}
+
 \bibliography{referencias}{}
 \bibliographystyle{ieeetr}
 
