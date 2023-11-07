@@ -8,6 +8,10 @@
 \usepackage{caption}
 \usepackage{amsmath, amssymb}
 \usepackage{graphicx}
+\usepackage{svg}
+\svgsetup{inkscapelatex=false}
+
+\newcommand{\circuit}[1]{\includesvg[width=0.9\columnwidth]{#1}}
 
 \title{Implementação Simulada de um Subconjunto da Microarquitetura RISC-V de 32
   Bits}
@@ -77,6 +81,70 @@ Além disso, os requisitos pedem uma implementação em modelo de monociclo, e
 permite que o endereçamento seja feito palavra-a-palavra ao invés de
 byte-a-byte, por ser mais viável no simulador utilizado. A implementação
 descrita aqui utiliza endereçamento byte-a-byte.
+
+\section{Banco de Registradores}
+
+O banco de registradores é um módulo com seis entradas e duas saídas:
+
+\circuit{register-bank}
+
+As entradas \textit{RS1i} e \textit{RS2i} selecionam quais registradores serão
+conectados às saídas \textit{RS1} e \textit{RS2}, respectivamente. A entrada
+\textit{RSA} seleciona um registrador para ter seu valor alterado, e a entrada
+\textit{RDA} contém esse valor. Além disso, a entrada de 1 bit \textit{WR} deve
+ser 1 para que haja escrita. A outra entrada de 1 bit, \textit{CLK}, deve ser
+conectada ao clock da máquina.
+
+As três entradas que endereçam registradores são entradas de 5 bits. Como cada
+registrador armazena 32 bits, as entradas e saídas de dados possuem esse
+tamanho.
+
+Para selecionar os registradores para as saídas, usam-se dois
+multiplexadores. Para selecionar o registrador que será alterado, usa-se um
+demultiplexador no sinal de escrita.
+
+Nota-se que o registrador endereçado por zero não é um registrador, mas sim uma
+constante. Isso se dá pois na microarquitetura esse registrador não é afetado
+por instruções de escrita, e sua leitura sempre deve resultar em zero.
+
+\section{Unidade Lógica e Aritmética}
+
+A Unidade Lógica e Aritmética (ULA) é um módulo com quatro entradas e duas
+saídas.
+
+\circuit{alu}
+
+As entradas \textit{A} e \textit{B} possuem 32 bits cada, sendo os operandos a
+serem utilizados na operação. As entradas \textit{OP3} e \textit{OP7} possuem 3
+e 7 bits cada, respectivamente, e selecionam a operação a ser realizada pela
+ULA. A maneira com que a seleção é feita é pensada para simplificar a lógica
+necessária em outras partes do processador, devido à maneira com que as
+instruções são codificadas.
+
+A entrada \textit{OP3} está diretamente ligada à seleção de um multiplexador,
+sendo o principal mecanismo de seleção da operação. A saída do somador da ULA é
+selecionada tanto quando \textit{OP3} é 0 quanto 2. Porém, no caso de
+\textit{OP3} ser 2, o bit mais significativo é utilizado para que a saída seja 0
+ou 1, pois essa operação se trata de um ``menor que''. Subtraindo \textit{B} de
+\textit{A}, o resultado é negativo caso \textit{A} seja menor que \textit{B},
+situação em que o bit mais significativo do resultado será 1.
+
+Além disso, um circuito acima do somador é utilizado para controlar se o mesmo
+fará uma adição normal ou uma subtração. Quando \textit{OP3} é 0, a operação
+pode ser tanto uma soma quanto uma subtração, dependendo do estado de
+\textit{OP7}. No caso da soma, o último é 0, e no caso da subtração, é 32. Como
+a operação desejada é uma subtração tanto no caso da subtração comum como no
+``menor que'', verificamos se \textit{OP3} é 2 ou se \textit{OP7} é 32 (esse
+último podemos verificar com apenas um bit do número, pois é a única operação
+que a ULA faz onde \textit{OP7} não é zero). Caso afirmativo, o somador utiliza
+o complemento do número em \textit{B} ao invés do original, e o valor 1 na
+entrada do \textit{carry}. Devido às propriedades aritméticas do complemento de
+2\cite{cornell-notes}, o resultado é a subtração de \textit{A} por \textit{B}.
+
+A saída de 32 bits \textit{R} possui o resultado da operação em si, e a saída de
+1 bit \textit{Zero} é construída a partir de uma operação NOR em todos os bits
+do resultado. Dessa forma, essa saída será 1 apenas quando o resultado for
+exatamente 0.
 
 \bibliography{referencias}{}
 \bibliographystyle{ieeetr}

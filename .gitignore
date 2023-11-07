@@ -9,3 +9,10 @@ cpu/*.png
 
 /cpu/RISCV_CARD_inst_format.pdf
 /cpu/instrucoes_riscv.png
+/cpu/relatorio/relatorio.aux
+/cpu/relatorio/relatorio.bbl
+/cpu/relatorio/relatorio.blg
+/cpu/relatorio/relatorio.log
+/cpu/relatorio/relatorio.out
+/cpu/relatorio/relatorio.pdf
+/cpu/relatorio/svg-inkscape/
