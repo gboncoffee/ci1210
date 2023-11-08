@@ -177,7 +177,7 @@ No caso em que ambos \textit{Load PC} e \textit{Load ALU} não estão em 1, o
 banco de registradores deve receber a saída da memória.
 
 Como todas as instruções que devem ser implementadas tem \textit{opcode}
-começando com 0b11, os dois primeiros bits são ignorados. Quanto ao resto, a
+começando com $0b11$, os dois primeiros bits são ignorados. Quanto ao resto, a
 lógica é a seguinte:
 
 \begin{itemize}
@@ -205,6 +205,49 @@ lógica é a seguinte:
   ligado à uma porta NAND que recebe como inputs a negação dos terceiro e quarto
   bits, um OR entre o quinto e o sétimo, e o sexto.
 \end{itemize}
+
+\section{Processamento de Imediato}
+
+Como há diferentes formatos de instrução, é necessário construir valores
+imediatos de maneira diferente para cada formato. O módulo de processamento de
+imediato recebe os 32 bits da instrução na entrada \textit{Instruction} e
+retorna um imediato de 32 bits na saída \textit{IMM}:
+
+\circuit{imm-proc}
+
+O módulo possui 4 circuitos separados para cada formato de instrução, e usa
+portas de transmissão para garantir que haja somente uma entrada conectada à
+saída. A montagem dos imediatos é extremamente simples, pois consiste em
+reorganizar a ordem dos bits nas regiões da instrução, adicionar uma constante 0
+como o primeiro bit dos imediatos que sofrem shift (formatos B e J), e extender
+o imediato com sinal.
+
+\begin{itemize}
+\item A instrução é de tipo I caso seja uma instrução aritmética com imediato ou
+  uma instrução de \textit{load}, ou seja, com \textit{opcode} $0b0010011$ ou
+  $0b0000011$. Para averiguar, usa-se a expressão
+  $(!O_3 O_2 \oplus  O_4) + !(O_5 + O_6)$.
+  Para os \textit{opcode} válidos no subconjunto implementado na CPU, essa
+  expressão é verdadeira somente para as instruções de tipo I.
+\item A instrução é de tipo S somente no caso em que é um \textit{store}. Essas
+  são as únicas instruções com quinto e sétimo bit 0 e sexto bit 1, portanto
+  isso é verificado.
+\item As instruções tipo B, da mesma maneira, são as únicas com sexto e sétimo
+  bits 1 e terceiro e quinto bits 0.
+\item As instruções tipo J, igualmente, são as únicas com terceiro e quarto bits
+  1 e quinto bit 0.
+\end{itemize}
+
+Dessa maneira, a construção dos imediatos é simples e legível.
+
+\section{Controle de Fluxo}
+
+Um módulo separado processa sinais que controlam o fluxo de execução do
+programa, ou seja, indicam o comportamento do PC (\textit{program counter}), um
+registrador separado do banco de registradores que guarda o endereço da
+instrução atual.
+
+\circuit{pc-signal}
 
 \bibliography{referencias}{}
 \bibliographystyle{ieeetr}
