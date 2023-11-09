@@ -249,6 +249,43 @@ instrução atual.
 
 \circuit{pc-signal}
 
+O módulo possui as entradas \textit{opcode}, de 7 bits, \textit{Zero out}, de 1
+único bit (conectada à saída \textit{Zero} da ULA), \textit{Alu out}, de 32 bits
+(conectada à saída da ULA), e \textit{Func 3}, de 3 bits. É importante notar que
+a entrada \textit{Func 3} não está ligada à saída \textit{Func 3} do processador
+de sinais. Ela está ligada diretamente à região ``func 3'' da instrução, que
+está sempre no mesmo lugar.
+
+A saída \textit{PC Alu} indica se o próximo valor do PC deve ser copiado do
+resultado da ULA, e a saída \textit{+ IMM} indica se o próximo valor do PC deve
+ser o resultado da soma do valor atual ao imediato. Ambas as saídas 0 indicam
+que o próximo valor deve ser o atual somado a 4, pois instruções tem 32 bits,
+portanto 4 bytes.
+
+A lógica começa verificando se a instrução é uma instrução de salto ou
+\textit{branch}. Para isso, verifica-se se os dois últimos bits dela estão em 1,
+pois esses tipos de instrução são os únicos implementados onde isso
+ocorre\cite{spec}. Caso falso, ambas as saídas automaticamente serão zero. Esse
+efeito é alcançado ao ligar o teste (que usa uma simples porta AND) à seleção de
+dois multiplexadores logo antes de cada saída, onde a opção 0 é ligada à
+constantes 0.
+
+A saída \textit{PC Alu} deve ser 1 somente quando a instrução é um
+\verb|jalr|. Portanto, liga-se a saída à uma porta AND que verifica se os quarto
+e quinto bit são 0 e o terceiro é 1.
+
+A saída \textit{+ IMM} deve ser 1 caso a instrução seja um \textit{branch}
+bem-sucedido ou um \verb|jal|. Liga-se uma porta OR à saída, comparando ambos os
+testes. Caso a instrução seja \verb|jal|, o quarto bit do \textit{opcode} é 1,
+portanto o teste é feito simplesmente ligando esse bit à entrada da porta
+OR. Caso a instrução seja um branch, os dois últimos bits devem ser 1 e o
+terceiro deve ser 0. Liga-se tudo isso num AND de 4 entradas, junto com o teste
+do sucesso do \textit{branch}.
+
+Para testar o sucesso do \textit{branch}, liga-se \textit{Func 3} à seleção de
+um multiplexador. \textit{Func 3} é 2, 5, 6 e 7 somente em situações não
+implementadas, portanto essas opções são ligadas em constantes 0.
+
 \bibliography{referencias}{}
 \bibliographystyle{ieeetr}
 
