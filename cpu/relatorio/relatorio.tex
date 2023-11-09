@@ -146,7 +146,7 @@ A saída de 32 bits \textit{R} possui o resultado da operação em si, e a saíd
 do resultado. Dessa forma, essa saída será 1 apenas quando o resultado for
 exatamente 0.
 
-\section{Sinais}
+\section{Sinais} \label{sinais}
 
 Certos aspectos do funcionamento do processador são controlados por um módulo
 chamado de processador de sinais. Esse componente possui uma entrada de 7 bits
@@ -284,7 +284,23 @@ do sucesso do \textit{branch}.
 
 Para testar o sucesso do \textit{branch}, liga-se \textit{Func 3} à seleção de
 um multiplexador. \textit{Func 3} é 2, 5, 6 e 7 somente em situações não
-implementadas, portanto essas opções são ligadas em constantes 0.
+implementadas, portanto essas opções são ligadas em constantes 0. Outras
+situações estão listadas a seguir. Todas dependem do fato demonstrado na seção
+de \ref{sinais} de que a ULA realizará uma subtração:
+
+\begin{itemize}
+\item \textit{Branch} em igual (\textit{Func 3} = 0): é realizado se a saída
+  \textit{Zero} da ULA é 1, portanto basta ligar essa saída diretamente na opção
+  do multiplexador.
+\item \textit{Branch} em diferente (\textit{Func 3} = 1): é a negação da
+  anterior.
+\item \textit{Branch} em menor quê (\textit{Func 3} = 3): é realizado caso o
+  último bit do resultado da ULA seja 0, por conta das propriedades de
+  complemento de 2\cite{cornell-notes}. Portanto liga-se a negação desse bit na
+  opção do multiplexador.
+\item \textit{Branch} em maior ou igual quê (\textit{Func 3} = 4): é a negação
+  da anterior.
+\end{itemize}
 
 \bibliography{referencias}{}
 \bibliographystyle{ieeetr}
