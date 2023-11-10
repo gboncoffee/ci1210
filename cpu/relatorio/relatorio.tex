@@ -302,6 +302,30 @@ de \ref{sinais} de que a ULA realizará uma subtração:
   da anterior.
 \end{itemize}
 
+\section{Memórias}
+
+Os requisitos do trabalho não exigiam o endereçamento ``byte-a-byte'' nas
+memórias, porém sua implementação com os recursos do simulador é
+interessante. Como não é possível configurar os componentes de memória
+\textit{built-in} para lerem/escreverem em mais de um byte por vez, foram
+criados módulos que abstraem o funcionamento de 4 chips de memória, de maneira a
+emular um único chip que endereça byte-a-byte, porém lê e escreve uma palavra
+por vez.
+
+\circuit{rom}
+
+A entrada \textit{S} é conectada diretamente à entrada \textit{sel} de cada
+chip, para que funcione de maneira transparente. A entrada de endereço é tratada
+antes de cada chip, utilizando aritmética modular. Como cada chip guarda um byte
+de um valor de 4 bytes, os dois menores bits do endereço são verificados para
+adicionar 1 ao endereço dos chips em módulo menor que o endereçado.
+
+\circuit{ram}
+
+A memória RAM funciona da mesma forma, porém a mesma lógica é utilizada para o
+valor de entrada. As entradas de \textit{clock} e sinais de escrita e leitura são
+passadas de maneira transparente.
+
 \bibliography{referencias}{}
 \bibliographystyle{ieeetr}
 
