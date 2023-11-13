@@ -1,0 +1,20 @@
+O arquivo principal da CPU é o cpu.dig.
+
+O programa que separa o arquivo cuspido pelo RARS recebe-o via stdout, porém
+cospe outros arquivos. Portanto:
+
+	$ cc split_files.c -o split_files
+	$ echo full.bin | ./split_files
+
+No fim, haverão arquivos "mod0.bin", "mod1.bin", etc. Cada um contendo a
+memória lida por cada chip de memória do Digital. Eles estão já prontos na
+tarball.
+
+O relatório precisa ser compilado com a opção --shell-escape. Mas ele também
+está já pronto na tarball.
+
+O arquivo fibonacci-real.s é o código Assembly utilizado na CPU. O arquivo
+fibonacci-otimizado.s é o utilizado no simulador para garantir que a lógica
+funcionava. Inclui no tarball por julgar relevante. Ele não possui o loop de
+verificação no final, usa a stack para alocar o vetor e utiliza a ecall do RARS
+para sair.
