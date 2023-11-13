@@ -9,6 +9,7 @@
 \usepackage{amsmath, amssymb}
 \usepackage{graphicx}
 \usepackage{svg}
+\usepackage{spverbatim}
 \svgsetup{inkscapelatex=false}
 
 \newcommand{\circuit}[1]{\includesvg[width=0.9\columnwidth]{#1}}
@@ -26,8 +27,8 @@
 Esse trabalho apresenta o processo de implementação de um subconjunto de
 instruções da microarquitetura de processadores RISC-V de 32 bits em um
 simulador de lógica digital. Para provar a corretude da implementação, ela deve
-rodar um programa em Assembly que computa a sequência de fibonacci em um vetor
-em memória.
+rodar um programa em Assembly que computa a sequência de fibonacci\cite{fib} em
+um vetor em memória.
 
 Tanto a microarquitetura quanto o programa foram implementados com sucesso,
 inclusive com os requisitos sendo excedidos.
@@ -323,8 +324,158 @@ adicionar 1 ao endereço dos chips em módulo menor que o endereçado.
 \circuit{ram}
 
 A memória RAM funciona da mesma forma, porém a mesma lógica é utilizada para o
-valor de entrada. As entradas de \textit{clock} e sinais de escrita e leitura são
-passadas de maneira transparente.
+valor de entrada. As entradas de \textit{clock} e sinais de escrita e leitura
+são passadas de maneira transparente.
+
+\section{Circuito Principal}
+
+O circuito principal da CPU possui, além da ligação de todos os componentes,
+lógica que lida com sinais e o controle de fluxo do programa.
+
+\circuit{cpu-copy}
+
+Todos os sinais que não são tratados internamente em algum módulo são tratados
+por meio de multiplexadores de 1 bit, como os sinais \textit{Load PC} e
+\textit{Load ALU}. Além disso, a instrução especial de \textit{halt}, que foi
+requerida no trabalho, é implementada como uma porta AND entre os dois primeiros
+bits da instrução, ligada ao sinal de escrita do PC. Como o PC é implementado
+utilizando um módulo ``registrador'' do simulador, ele possui uma entrada que
+controla a escrita. Todas as instruções da especificação da microarquitetura que
+devem ser implementadas no trabalho possuem os dois primeiros bits como 1,
+portanto qualquer instrução sem os dois primeiros bits 1 irá desativar a escrita
+do PC, que ficará o tempo todo na mesma instrução.
+
+\section{O programa}
+
+O trabalho exigia um programa em Assembly que fosse montado e rodado na CPU
+projetada. Esse programa deve criar os 20 primeiros números da sequência de
+Fibonacci em um vetor iniciando na posição 0 da memória, baseando-se no programa
+em C a seguir:
+
+\begin{spverbatim}
+void fib(int *vet, int tam, int elem1, int elem2)
+{
+        int i;
+        vet[0] = elem1;
+        vet[1] = elem2;
+        for (i = 2; i < tam; i++) {
+                vet[i] = vet[i - 1] + vet[i - 2];
+        }
+}
+
+int main(void)
+{
+        int vet[20];
+        fib(vet, 20, 1, 1);
+}
+\end{spverbatim}
+
+O programa pode sofrer otimizações e pode executar passos adicionais para
+auxiliar a verificação da corretude, porém deve necessariamente utilizar uma
+função para \verb|fib(int*, int, int, int)| e seguir as convenções de chamada de
+função.
+
+O programa em Assembly desenvolvido foi o seguinte:
+
+\begin{spverbatim}
+.text
+        add a0, zero, zero
+        addi a1, zero, 20
+        addi a2, zero, 1
+        addi a3, zero, 1
+        jal ra, fib
+
+        addi t0, zero, 80
+        add t1, zero, zero
+        print:	beq t1, t0, exit
+        lw t2, 0(t1)
+        sw t2, 0(t1)
+        addi t1, t1, 4
+        jal zero, print
+
+exit:	halt
+
+fib:    sw a2, 0(a0)
+        sw a3, 4(a0)
+
+        slli t0, a1, 2
+        add t0, t0, a0
+        addi a0, a0, 8
+
+loop:   blt t0, a0, ret
+        add t1, a2, a3
+        sw t1, 0(a0)
+        add a2, a3, zero
+        add a3, t1, zero
+        addi a0, a0, 4
+        jal zero, loop
+
+ret:    jalr zero, 0(ra)
+\end{spverbatim}
+
+Além do requerido, após a chamada da função, um loop carrega os valores criados
+no vetor para um registrador, e depois salva novamente na memória. Como não é
+possível verificar o resultado da computação no módulo de memória após o término
+do programa, isso auxilia na verificação da sua corretude. Entre as otimizações
+realizadas, destaca-se o uso de registradores como ``cache'' para os elementos
+do vetor durante o loop, que serão possivelmente utilizados na iteração
+seguinte.
+
+Para testagem e montagem do programa, foi utilizado o simulador
+RARS\cite{rars} e sua opção de ``dump'' binário. Após gerado o arquivo binário
+com as instruções, foi utilizado o seguinte programa em C para gerar quatro
+arquivos diferentes, para que cada um seja carregado por um dos chips de memória
+do módulo de ROM:
+
+\begin{spverbatim}
+#include <stdio.h>
+
+int main(void)
+{
+        unsigned char c;
+        int i;
+        FILE *files[4];
+        files[0] = fopen("mod0.bin", "wb");
+        files[1] = fopen("mod1.bin", "wb");
+        files[2] = fopen("mod2.bin", "wb");
+        files[3] = fopen("mod3.bin", "wb");
+
+        if (!(files[0] && files[1] && files[2] && files[3]))
+                return 1;
+
+        i = 0;
+        c = getchar();
+        while (!feof(stdin)) {
+                fputc(c, files[i % 4]);
+                i++;
+                c = getchar();
+        }
+
+        fclose(files[0]);
+        fclose(files[1]);
+        fclose(files[2]);
+        fclose(files[3]);
+
+        return 0;
+}
+\end{spverbatim}
+
+Como o simulador não possui uma instrução de \textit{halt}, para montar o
+programa essa instrução foi trocada pela instrução
+\verb|add zero, zero, zero|. A escolha dessa instrução específica foi devido ao
+fato de ser composta inteiramente por bits 0 exceto pelo \textit{opcode}. Assim
+foi possível, após a montagem do programa com o simulador, abrir o arquivo
+gerado em um editor de arquivos binários (no caso, o \textit{Okteta}, do projeto
+KDE\cite{okteta} e alterar o \textit{opcode} para ser todo 0.
+
+Com todos os arquivos prontos, foi possível executar o programa com sucesso na
+CPU projetada.
+
+\section{Conclusão}
+
+Os requisitos do trabalho foram completos com sucesso, inclusive sendo
+excedidos. A CPU projetada no simulador computou corretamente o programa
+requerido.
 
 \bibliography{referencias}{}
 \bibliographystyle{ieeetr}
