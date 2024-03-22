@@ -1,0 +1,29 @@
+Introduction to Assembly (RISC-V)
+- CI1210 - Universidade Federal do Paraná
+(Federal University of Paraná)
+
+The processor is like a state machine:
+- Reads the current instruction;
+- Changes the machine's state;
+- Repeat.
+
+The state is organized in three parts:
+- Memory (RAM): Big (4Gib), slow to access.
+- Registers: Small (32 x 4 bytes, 0 is constant), very fast.
+- Special PC register: current instruction address.
+
+Operates in bytes (8 bits), halfs (16 bits) and words (32 bits).
+Instructions are stored in memory and are a word long.
+Load/Store: there's no operation directly in memory!
+
+EGG emulator (version 1.1.3)
+- RISC-V IM;
+- Good for studying:
+  - No pseudoinstructions;
+  - Simple and coese syntax without special cases;
+  - Direct access to all memory;
+- Debugger and IO.
+
+Written in Go, without dependencies.
+Binaries for amd64 Linux and Windows:
+https://github.com/gboncoffee/egg/releases

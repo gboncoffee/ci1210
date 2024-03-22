@@ -1,0 +1,28 @@
+Introdução à Assembly (RISC-V)
+- CI1210 - Universidade Federal do Paraná
+
+Pode-se enxergar o processador como uma máquina de estado:
+- Lê-se a instrução atual;
+- Altera-se o estado da máquina;
+- Repete.
+
+O estado é organizado em três partes:
+- Memória (RAM): Grande (4Gib), acesso demorado.
+- Registradores: Pequenos (32 x 4 bytes, 0 é constante), acesso bem rápido.
+- Registrador especial PC: endereço da instrução atual.
+
+Opera em bytes (8 bits), halfs (16 bits) e palavras (32 bits).
+Instruções ficam na memória e tem uma palavra de tamanho.
+Load/Store: não opera na memória!
+
+Emulador EGG (versão 1.1.3)
+- Suporta RISC-V IM;
+- Bom para estudo:
+  - Sem pseudoinstruções;
+  - Sintaxe simples e coesa, sem casos especiais;
+  - Acesso direto à toda a memória;
+- Debugger e IO.
+
+Escrito em Go, sem dependências.
+Binários para amd64 Linux e Windows:
+https://github.com/gboncoffee/egg/releases
