@@ -1,0 +1,36 @@
+Introdução à Assembly (RISC-V)
+- CI1210 - Universidade Federal do Paraná
+Instruções Aritméticas e Lógicas
+
+Operam em registradores:
+add, sub
+xor, or, and
+sll, srl, sra
+slt, sltu
+
+Exemplos:
+add t1, t2, t3
+sub t1, t1, t2
+xor t1, t1, t1
+
+Com imediato:
+addi
+xori, ori, andi
+slli, srli, srai
+slti, sltiu
+
+Exemplos:
+addi t1, zero, 42
+slli t2, t1, 2
+andi t1, t1, 0xff
+
+Extensão de Multiplicação:
+mul, mulh, mulsu, mulu
+div, divu
+rem, remu
+
+Exemplos:
+Carregar imediato: addi t1, zero, imm
+Copiar valor: addi t1, t2, 0
+
+Imediatos têm somente 12 bits!

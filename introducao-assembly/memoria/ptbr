@@ -1,0 +1,26 @@
+Introdução à Assembly (RISC-V)
+- CI1210 - Universidade Federal do Paraná
+Instruções de Acesso à Memória
+
+Carregam da memória para um registrador (load):
+lb, lh, lw
+lbu, lhu
+
+Salvam de um registrador para a memória (store):
+sb, sh, sw
+
+Sintaxe:
+lw rd, rs1, imm
+    rd = mem[rs1+imm]
+sw rd, rs1, imm
+    mem[rd+imm] = rs1
+
+Imediatos tem apenas 12 bits!
+
+Registrador sp: ponteiro da stack
+push:
+    addi sp, sp, -4
+    sw sp, t1, 0
+pop:
+    lw t1, sp, 0
+    addi sp, sp, 4

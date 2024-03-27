@@ -1,0 +1,27 @@
+Introduction to Assembly (RISC-V)
+- CI1210 - Universidade Federal do Paraná
+(Federal University of Paraná)
+Memory Access Instructions
+
+From memory to register (load):
+lb, lh, lw
+lbu, lhu
+
+From register to memory (store):
+sb, sh, sw
+
+Syntax:
+lw rd, rs1, imm
+    rd = mem[rs1+imm]
+sw rd, rs1, imm
+    mem[rd+imm] = rs1
+
+Immediates are only 12 bits long!
+
+sp register: stack pointer
+push:
+    addi sp, sp, -4
+    sw sp, t1, 0
+pop:
+    lw t1, sp, 0
+    addi sp, sp, 4
