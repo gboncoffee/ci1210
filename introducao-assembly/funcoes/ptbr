@@ -1,0 +1,24 @@
+Introdução à Assembly (RISC-V)
+- CI1210 - Universidade Federal do Paraná
+Convenção de Chamada de Funções
+
+A chamada e o retorno de funções será realizada com jal e jalr
+        jal ra, imm
+        jalr ra, rs1, imm
+
+Usamos a memória (pilha) para salvar valores entre funções.
+
+Registradores:
+- t0..t6: temporários
+- s0..s11: salvos
+- a0..a7: argumentos
+- sp: ponteiro da pilha
+- ra: valor de retorno
+
+Exemplo em C: Fatorial recursivo
+int fatorial(int n)
+{
+        if (n == 0)
+                return 1;
+        return n * fatorial(n - 1);
+}

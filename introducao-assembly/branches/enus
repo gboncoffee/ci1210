@@ -1,0 +1,24 @@
+Introduction to Assembly (RISC-V)
+- CI1210 - Universidade Federal do Paraná
+(Federal University of Paraná)
+Branch and Jump Instructions
+
+Verify a condition and take a jump:
+  if (condition) pc += IMM
+  else pc += 4
+
+Operate on two registers and an immediate:
+beq, bne, blt, bge, bltu, bgeu
+
+Inconditionally jump:
+jal ra, imm
+jalr ra, rs1, imm
+
+Example: for (int i = 0; i < 2; i++)
+        addi t0, zero, 0
+        addi t2, zero, 2
+for:
+        bge t0, t2, out_for
+        addi t0, t0, 1
+        jal zero, for
+out_for:
