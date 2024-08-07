@@ -295,8 +295,35 @@ brainfuck_pc_left_clean_ret:
 ;; - 1 if mismatch (up)
 ;; - The new PC in a1
 brainfuck_pc_right:
-	ebreak
-	#TODO
+	addi a0, a0, 1
+	addi t0, zero, -1
+	;; If a1 is -1, we reached the point, so returns.
+	beq a1, t0, brainfuck_pc_right_clean_ret
+	;; Compares the instruction byte.
+	lb t0, a0, 0
+	;; If [ (0x5b).
+	addi t1, zero, 0x5b
+	beq t0, t1, brainfuck_pc_right_dec_recurse
+	;; If ] (0x5d).
+	addi t1, zero, 0x5d
+	beq t0, t1, brainfuck_pc_right_inc_recurse
+	;; If 0, we're smashing the program limit.
+	beq t0, zero, brainfuck_pc_right_error
+	;; Else, just recurses.
+	jal zero, brainfuck_pc_right
+brainfuck_pc_right_dec_recurse:
+	addi a1, a1, -1
+	jal zero, brainfuck_pc_right
+brainfuck_pc_right_inc_recurse:
+	addi a1, a1, 1
+	jal zero, brainfuck_pc_right
+brainfuck_pc_right_error:
+	addi a0, a0, 1
+	jalr zero, ra, 0
+brainfuck_pc_right_clean_ret:
+	addi a1, a0, 0
+	addi a0, zero, 0
+	jalr zero, ra, 0
 
 panic_jmp_mismatch_up_msg: #ERROR: [ without matching ]%0a
 panic_jmp_mismatch_down_msg: #ERROR: ] without matching [%0a
