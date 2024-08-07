@@ -10,7 +10,7 @@
 ;; Optimizing by ditching code conventions shows how hand-written Assembly still
 ;; has it's place in the industry in 2024. A great example of real-world usage
 ;; of optimized hand-written Assembly code is FFmpeg (https://ffmpeg.org/).
-;; 
+;;
 ;; Have fun and don't forget the Joy of Computing!
 ;;
 ;;
@@ -165,47 +165,71 @@ brainfuck_main_loop:
 brainfuck_dp_left:
 	addi s1, s1, 1
 	bge s1, sp, brainfuck_dp_left_error
-	addi s0, s0, 1
-	jal zero, brainfuck_main_loop
+	jal zero, brainfuck_clean_loop
 
 brainfuck_dp_right:
 	addi s1, s1, -1
 	blt s1, s3, brainfuck_dp_right_error
-	addi s0, s0, 1
-	jal zero, brainfuck_main_loop
+	jal zero, brainfuck_clean_loop
 
 brainfuck_inc:
 	lb t0, s1, 0
 	addi t0, t0, 1
 	sb s1, t0, 0
-	addi s0, s0, 1
-	jal zero, brainfuck_main_loop
+	jal zero, brainfuck_clean_loop
 
 brainfuck_dec:
 	lb t0, s1, 0
 	addi t0, t0, -1
 	sb s1, t0, 0
-	addi s0, s0, 1
-	jal zero, brainfuck_main_loop
+	jal zero, brainfuck_clean_loop
 
 brainfuck_out:
 	addi a7, zero, 3
 	addi a0, s1, 0
 	addi a1, zero, 1
 	ecall
-	jal zero, brainfuck_main_loop
+	jal zero, brainfuck_clean_loop
 
 brainfuck_in:
 	addi a7, zero, 2
 	addi a0, s1, 0
 	addi a1, zero, 1
 	ecall
-	jal zero, brainfuck_main_loop
+	jal zero, brainfuck_clean_loop
 
 brainfuck_pc_left_call:
+	;; If the byte at the current cell is NONZERO, DON'T jump.
+	lb t0, s1, 0
+	bne t0, zero, brainfuck_clean_loop
+	;; Else perform the jump via the brainfuck_pc_left function.
 	addi a0, s0, 0
-	addi
+	addi a1, s2, 0
+	addi a2, zero, 0
+	jal ra, brainfuck_pc_left
+	;; Update PC and loop if no error, else returns.
+	addi s0, a1, 0
+	beq a0, zero, brainfuck_main_loop
+	addi a0, zero, 2
+	jal zero, brainfuck_ret
+
 brainfuck_pc_right_call:
+	;; If the byte at the current cell is ZERO, DON'T jump.
+	lb t0, s1, 0
+	beq t0, zero, brainfuck_clean_loop
+	;; Else perform the jump via the brainfuck_pc_right function.
+	addi a0, s0, 0
+	addi a1, zero, 0
+	jal ra, brainfuck_pc_right
+	;; Update PC and loop if no error, else returns.
+	addi s0, a1, 0
+	beq a0, zero, brainfuck_main_loop
+	addi a0, zero, 1
+	jal zero, brainfuck_ret
+
+brainfuck_clean_loop:
+	addi s0, s0, 1
+	jal zero, brainfuck_main_loop
 
 brainfuck_dp_right_error:
 	addi a0, zero, 3
@@ -231,17 +255,45 @@ brainfuck_ret:
 ;; Returns:
 ;; - 0 if success
 ;; - 1 if mismatch (down)
+;; - The new PC in a1
 brainfuck_pc_left:
-	ebreak
-	#TODO
+	addi a0, a0, -1
+	;; If smashing the program base, returns error.
+	blt a0, a1, brainfuck_pc_left_error
+	;; If a2 is -1, we reached the point, so returns.
+	addi t0, zero, -1
+	beq a2, t0, brainfuck_pc_left_clean_ret
+	;; Compares the instruction byte.
+	lb t0, a0, 0
+	;; If ] (0x5d).
+	addi t1, zero, 0x5d
+	beq t0, t1, brainfuck_pc_left_dec_recurse
+	;; If [ (0x5b).
+	addi t1, zero, 0x5b
+	beq t0, t1, brainfuck_pc_left_inc_recurse
+	;; Else, just recurses.
+	jal zero, brainfuck_pc_left
+brainfuck_pc_left_dec_recurse:
+	addi a2, a2, -1
+	jal zero, brainfuck_pc_left
+brainfuck_pc_left_inc_recurse:
+	addi a2, a2, 1
+	jal zero, brainfuck_pc_left
+brainfuck_pc_left_error:
+	addi a0, zero, 1
+	jalr zero, ra, 0
+brainfuck_pc_left_clean_ret:
+	addi a1, a0, 0
+	addi a0, zero, 0
+	jalr zero, ra, 0
 
 ;; Receives:
 ;; a0 <- pc
-;; a1 <- program limit
-;; a2 <- current bracket depth
+;; a1 <- current bracket depth
 ;; Returns:
 ;; - 0 if success
 ;; - 1 if mismatch (up)
+;; - The new PC in a1
 brainfuck_pc_right:
 	ebreak
 	#TODO
