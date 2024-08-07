@@ -36,16 +36,6 @@
 
 	addi sp, zero, 0
 
-	;; Ensures the program buffer is zeroed.
-	addi t0, zero, program
-	addi t1, t0, 1024
-ensure_zero_loop:
-	blt t1, t0, read_program
-	sb t0, zero, 0
-	addi t0, t0, 1
-	jal zero, ensure_zero_loop
-
-read_program:
 	;; Reads the program.
 	addi a7, zero, 2
 	addi a0, zero, program
@@ -72,23 +62,23 @@ read_program:
 
 panic_jmp_mismatch_up:
 	addi a0, zero, panic_jmp_mismatch_up_msg
-	addi a1, zero, 28
+	addi a1, zero, 27
 	jal zero, panic
 panic_jmp_mismatch_down:
 	addi a0, zero, panic_jmp_mismatch_down_msg
-	addi a1, zero, 28
+	addi a1, zero, 27
 	jal zero, panic
 panic_stack_overflow_up:
 	addi a0, zero, panic_stack_overflow_up_msg
-	addi a1, zero, 25
+	addi a1, zero, 24
 	jal zero, panic
 panic_stack_overflow_down:
 	addi a0, zero, panic_stack_overflow_down_msg
-	addi a1, zero, 27
+	addi a1, zero, 26
 	jal zero, panic
-panic_unknown_instruction
+panic_unknown_instruction:
 	addi a0, zero, panic_unknown_instruction_msg
-	addi a1, zero, 27
+	addi a1, zero, 26
 
 panic:
 	addi a7, zero, 3
@@ -131,8 +121,9 @@ brainfuck:
 brainfuck_main_loop:
 	lb t0, s0, 0
 
-	;; Check if 0 (quit).
-	beq t0, zero, brainfuck_clean_ret
+	;; Check if \n (quit).
+	addi t1, zero, 0x0a
+	beq t0, t1, brainfuck_clean_ret
 	;; Check if < (0x3c)
 	addi t1, zero, 0x3c
 	beq t0, t1, brainfuck_dp_left
@@ -151,11 +142,11 @@ brainfuck_main_loop:
 	;; Check if , (0x2c)
 	addi t1, zero, 0x2c
 	beq t0, t1, brainfuck_in
-	;; Check if [ (0x5b)
-	addi t1, zero, 0x5b
-	beq t0, t1, brainfuck_pc_left_call
 	;; Check if ] (0x5d)
 	addi t1, zero, 0x5d
+	beq t0, t1, brainfuck_pc_left_call
+	;; Check if [ (0x5b)
+	addi t1, zero, 0x5b
 	beq t0, t1, brainfuck_pc_right_call
 
 	;; Unknown instruction reached.
@@ -163,13 +154,13 @@ brainfuck_main_loop:
 	jal zero, brainfuck_ret
 
 brainfuck_dp_left:
-	addi s1, s1, 1
-	bge s1, sp, brainfuck_dp_left_error
+	addi s1, s1, -1
+	blt s1, s3, brainfuck_dp_left_error
 	jal zero, brainfuck_clean_loop
 
 brainfuck_dp_right:
-	addi s1, s1, -1
-	blt s1, s3, brainfuck_dp_right_error
+	addi s1, s1, 1
+	bge s1, sp, brainfuck_dp_right_error
 	jal zero, brainfuck_clean_loop
 
 brainfuck_inc:
@@ -185,14 +176,14 @@ brainfuck_dec:
 	jal zero, brainfuck_clean_loop
 
 brainfuck_out:
-	addi a7, zero, 3
+	addi a7, zero, 2
 	addi a0, s1, 0
 	addi a1, zero, 1
 	ecall
 	jal zero, brainfuck_clean_loop
 
 brainfuck_in:
-	addi a7, zero, 2
+	addi a7, zero, 3
 	addi a0, s1, 0
 	addi a1, zero, 1
 	ecall
@@ -231,10 +222,10 @@ brainfuck_clean_loop:
 	addi s0, s0, 1
 	jal zero, brainfuck_main_loop
 
-brainfuck_dp_right_error:
+brainfuck_dp_left_error:
 	addi a0, zero, 3
 	jal zero, brainfuck_ret
-brainfuck_dp_left_error:
+brainfuck_dp_right_error:
 	addi a0, zero, 4
 	jal zero, brainfuck_ret
 brainfuck_clean_ret:
@@ -265,11 +256,11 @@ brainfuck_pc_left:
 	beq a2, t0, brainfuck_pc_left_clean_ret
 	;; Compares the instruction byte.
 	lb t0, a0, 0
-	;; If ] (0x5d).
-	addi t1, zero, 0x5d
-	beq t0, t1, brainfuck_pc_left_dec_recurse
 	;; If [ (0x5b).
 	addi t1, zero, 0x5b
+	beq t0, t1, brainfuck_pc_left_dec_recurse
+	;; If ] (0x5d).
+	addi t1, zero, 0x5d
 	beq t0, t1, brainfuck_pc_left_inc_recurse
 	;; Else, just recurses.
 	jal zero, brainfuck_pc_left
@@ -301,11 +292,11 @@ brainfuck_pc_right:
 	beq a1, t0, brainfuck_pc_right_clean_ret
 	;; Compares the instruction byte.
 	lb t0, a0, 0
-	;; If [ (0x5b).
-	addi t1, zero, 0x5b
-	beq t0, t1, brainfuck_pc_right_dec_recurse
 	;; If ] (0x5d).
 	addi t1, zero, 0x5d
+	beq t0, t1, brainfuck_pc_right_dec_recurse
+	;; If [ (0x5b).
+	addi t1, zero, 0x5b
 	beq t0, t1, brainfuck_pc_right_inc_recurse
 	;; If 0, we're smashing the program limit.
 	beq t0, zero, brainfuck_pc_right_error
@@ -325,10 +316,15 @@ brainfuck_pc_right_clean_ret:
 	addi a0, zero, 0
 	jalr zero, ra, 0
 
-panic_jmp_mismatch_up_msg: #ERROR: [ without matching ]%0a
-panic_jmp_mismatch_down_msg: #ERROR: ] without matching [%0a
-panic_stack_overflow_up_msg: #ERROR: stack overflow up%0a
-panic_stack_overflow_down_msg: #ERROR: stack overflow down%0a
-panic_unknown_instruction_msg: #ERROR: unknown instruction%0a
+panic_jmp_mismatch_up_msg:
+#ERROR [ without matching ]%0a
+panic_jmp_mismatch_down_msg:
+#ERROR ] without matching [%0a
+panic_stack_overflow_up_msg:
+#ERROR stack overflow up%0a
+panic_stack_overflow_down_msg:
+#ERROR stack overflow down%0a
+panic_unknown_instruction_msg:
+#ERROR unknown instruction%0a
 
 program:
