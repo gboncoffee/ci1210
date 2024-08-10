@@ -88,8 +88,8 @@ exit_program:
 
 ;; Returns:
 ;; - 0 if success (step in 0).
-;; - 1 if [] mismatch up.
-;; - 2 if [] mistmatch down.
+;; - 1 if [] mismatch down.
+;; - 2 if [] mistmatch up.
 ;; - 3 if stack overflow down.
 ;; - 4 if stack overflow up (reaches the program stack).
 ;; - 5 if unknown instruction.
@@ -114,7 +114,7 @@ brainfuck:
 
 	;; Brainfuck stack goes right after the program and grows upwards.
 	addi s1, zero, program
-	addi s1, s1, 1
+	addi s1, s1, 1024
 	addi s3, s1, 0
 
 	;; Main machine loop.
@@ -160,7 +160,7 @@ brainfuck_dp_left:
 
 brainfuck_dp_right:
 	addi s1, s1, 1
-	bge s1, sp, brainfuck_dp_right_error
+	bgeu s1, sp, brainfuck_dp_right_error
 	jal zero, brainfuck_clean_loop
 
 brainfuck_inc:
@@ -176,23 +176,23 @@ brainfuck_dec:
 	jal zero, brainfuck_clean_loop
 
 brainfuck_out:
-	addi a7, zero, 2
-	addi a0, s1, 0
-	addi a1, zero, 1
-	ecall
-	jal zero, brainfuck_clean_loop
-
-brainfuck_in:
 	addi a7, zero, 3
 	addi a0, s1, 0
 	addi a1, zero, 1
 	ecall
 	jal zero, brainfuck_clean_loop
 
+brainfuck_in:
+	addi a7, zero, 2
+	addi a0, s1, 0
+	addi a1, zero, 1
+	ecall
+	jal zero, brainfuck_clean_loop
+
 brainfuck_pc_left_call:
-	;; If the byte at the current cell is NONZERO, DON'T jump.
+	;; If the byte at the current cell is NONZERO, do jump.
 	lb t0, s1, 0
-	bne t0, zero, brainfuck_clean_loop
+	beq t0, zero, brainfuck_clean_loop
 	;; Else perform the jump via the brainfuck_pc_left function.
 	addi a0, s0, 0
 	addi a1, s2, 0
@@ -205,9 +205,9 @@ brainfuck_pc_left_call:
 	jal zero, brainfuck_ret
 
 brainfuck_pc_right_call:
-	;; If the byte at the current cell is ZERO, DON'T jump.
+	;; If the byte at the current cell is ZERO, do jump.
 	lb t0, s1, 0
-	beq t0, zero, brainfuck_clean_loop
+	bne t0, zero, brainfuck_clean_loop
 	;; Else perform the jump via the brainfuck_pc_right function.
 	addi a0, s0, 0
 	addi a1, zero, 0
@@ -256,12 +256,12 @@ brainfuck_pc_left:
 	beq a2, t0, brainfuck_pc_left_clean_ret
 	;; Compares the instruction byte.
 	lb t0, a0, 0
-	;; If [ (0x5b).
-	addi t1, zero, 0x5b
-	beq t0, t1, brainfuck_pc_left_dec_recurse
 	;; If ] (0x5d).
 	addi t1, zero, 0x5d
 	beq t0, t1, brainfuck_pc_left_inc_recurse
+	;; If [ (0x5b).
+	addi t1, zero, 0x5b
+	beq t0, t1, brainfuck_pc_left_dec_recurse
 	;; Else, just recurses.
 	jal zero, brainfuck_pc_left
 brainfuck_pc_left_dec_recurse:
@@ -274,7 +274,9 @@ brainfuck_pc_left_error:
 	addi a0, zero, 1
 	jalr zero, ra, 0
 brainfuck_pc_left_clean_ret:
-	addi a1, a0, 0
+	;; In this case we shall return a0 + 2 as the PC is at the instruction right
+	;; before the matching ].
+	addi a1, a0, 2
 	addi a0, zero, 0
 	jalr zero, ra, 0
 
@@ -292,14 +294,15 @@ brainfuck_pc_right:
 	beq a1, t0, brainfuck_pc_right_clean_ret
 	;; Compares the instruction byte.
 	lb t0, a0, 0
-	;; If ] (0x5d).
-	addi t1, zero, 0x5d
-	beq t0, t1, brainfuck_pc_right_dec_recurse
 	;; If [ (0x5b).
 	addi t1, zero, 0x5b
 	beq t0, t1, brainfuck_pc_right_inc_recurse
-	;; If 0, we're smashing the program limit.
-	beq t0, zero, brainfuck_pc_right_error
+	;; If ] (0x5d).
+	addi t1, zero, 0x5d
+	beq t0, t1, brainfuck_pc_right_dec_recurse
+	;; If \n (0x0a), we're smashing the program limit.
+	addi t1, zero, 0x0a
+	beq t0, t1, brainfuck_pc_right_error
 	;; Else, just recurses.
 	jal zero, brainfuck_pc_right
 brainfuck_pc_right_dec_recurse:
@@ -317,9 +320,9 @@ brainfuck_pc_right_clean_ret:
 	jalr zero, ra, 0
 
 panic_jmp_mismatch_up_msg:
-#ERROR [ without matching ]%0a
-panic_jmp_mismatch_down_msg:
 #ERROR ] without matching [%0a
+panic_jmp_mismatch_down_msg:
+#ERROR [ without matching ]%0a
 panic_stack_overflow_up_msg:
 #ERROR stack overflow up%0a
 panic_stack_overflow_down_msg:
